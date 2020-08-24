@@ -8,7 +8,7 @@ from PIL import Image
 import traceback
 from sys import version_info
 
-
+###
 def base64_api(uname, pwd, img):
     img = img.convert('RGB')
     buffered = BytesIO()
