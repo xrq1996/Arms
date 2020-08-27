@@ -97,6 +97,8 @@ dede_manager
 dede_web
 guanli
 houtai
+_manage
+manage_
 main
 manage
 manger_admin
@@ -115,3 +117,4 @@ aaaa
 aaaaa
 aaaaaa
 aaaaaaa
+my_dede

