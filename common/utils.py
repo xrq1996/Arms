@@ -75,6 +75,10 @@ def find_substring(string, substring, times):
     return current - 1
 
 
+def group_by_list(data,num):
+    data = [data[i:i + num] for i in range(0, len(data), num)]
+    return data
+
 def format_domain(url, protocol=False):
     if protocol:
         if "http" not in url:
