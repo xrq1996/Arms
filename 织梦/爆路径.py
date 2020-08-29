@@ -139,7 +139,7 @@ if __name__ == '__main__':
     # 线程数
     t_num = 20
     ts = []
-    domains = utils.get_lines("./target/批量爆破织梦后台")
+    domains = utils.get_lines("./target/成功注册结果")
     # 结果集
     ress = []
     # get_back_url("dede.local.com")
