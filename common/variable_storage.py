@@ -7,3 +7,8 @@ proxys = []
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
 }
+
+dede_vc_url = "/include/vdimgck.php"
+vcode_pm_uname = "danche"
+vcode_pm_pwd = "qq199605"
+mail = "3che@protonmail.ch"

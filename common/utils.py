@@ -2,7 +2,7 @@ import requests
 import traceback
 import base64
 import json
-from 织梦 import variable_storage
+from common import variable_storage
 import time
 from io import BytesIO
 from sys import version_info
@@ -29,7 +29,7 @@ def my_requests(url, method='get', timeout=15, try_count=3, show_log=False, requ
                 print("请求：" + url)
             if (variable_storage.change_ip):
                 response = requester.request(method=method, url=url, headers=my_headers,
-                                            proxies=variable_storage.proxy, timeout=timeout, verify=False, **args)
+                                             proxies=variable_storage.proxy, timeout=timeout, verify=False, **args)
             else:
                 response = requester.request(method=method, url=url, headers=my_headers, timeout=timeout,
                                             verify=False, **args)
