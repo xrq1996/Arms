@@ -1,30 +1,8 @@
-import json
-from 织梦 import utils
-import base64
+from common import utils
+from common import variable_storage
 import requests
-from 织梦 import dedecms
-from io import BytesIO
 from PIL import Image
 import traceback
-from sys import version_info
-
-
-def base64_api(uname, pwd, img):
-    img = img.convert('RGB')
-    buffered = BytesIO()
-    img.save(buffered, format="JPEG")
-    if version_info.major >= 3:
-        b64 = str(base64.b64encode(buffered.getvalue()), encoding='utf-8')
-    else:
-        b64 = str(base64.b64encode(buffered.getvalue()))
-    data = {"username": uname, "password": pwd, "image": b64}
-    result = json.loads(utils.my_requests(method="post",url="http://api.ttshitu.com/base64", json=data).text)
-    if result['success']:
-        return result["data"]["result"]
-    else:
-        return result["message"]
-    return ""
-
 
 def post_data(session, domain, vcode):
     try:
@@ -39,18 +17,18 @@ def post_data(session, domain, vcode):
             return True
         else:
             print("%s:注册失败！" % domain)
-    except Exception  as e:
-        traceback.print_exc(e)
+    except Exception as e:
+        traceback.print_exc()
 
 
 def 注册(domain, num=5):
     session = requests.session()
-    res = session.get(domain + cp_url,timeout=10)
+    res = session.get(domain + variable_storage.dede_vc_url,timeout=10)
     with open(file="tp.jpg", mode="wb") as fp:
         fp.write(res.content)
     img_path = "tp.jpg"
     img = Image.open(img_path)
-    result = base64_api(uname='danche', pwd='qq199605', img=img)
+    result = utils.base64_api(uname='danche', pwd='qq199605', img=img)
     print(result)
     res = post_data(session, domain, result)
     if res:
@@ -59,10 +37,17 @@ def 注册(domain, num=5):
         print("尝试重新注册：" + domain)
         return 注册(domain, num - 1)
 
+def main():
+    while True:
+        # get domain
+        domain = ""
+        res = 注册(domain=domain)
+        #结果入库
+
+
 
 if __name__ == "__main__":
     domains = utils.get_lines("./验证注册")
-    cp_url = "/include/vdimgck.php"
     for domain in domains:
         try:
             print(domain)
