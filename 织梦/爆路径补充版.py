@@ -3,7 +3,7 @@
 import re
 import os
 import requests
-from 织梦 import utils
+from common import utils
 
 
 is_ip = False

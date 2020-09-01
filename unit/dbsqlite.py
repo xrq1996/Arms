@@ -7,11 +7,11 @@ import datetime
 import threading
 R = threading.Lock()
 
-def data_creat(self):
+def data_creat():
     try:
         conn = sqlite3.connect('logs.db')
         cursor = conn.cursor()
-        cursor.execute("create table domaintable(ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,domain TEXT, status int,add_time TEXT)")
+        cursor.execute("create table domaintable(ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,domain TEXT,is_crawl Int DEFAULT 0, status Int DEFAULT 0,add_time datetime,des TEXT DEFAULT '',title TEXT DEFAULT '',steps Int DEFAULT 0)")
         cursor.close()
         conn.commit()
         conn.close()
@@ -36,16 +36,15 @@ def data_select(domain):
         return None
 
 def data_insert(domain):
-
     try:
-        R.acquire()
+        #R.acquire()
         conn = sqlite3.connect('logs.db')
         cursor = conn.cursor()
         domain = domain
         conn.execute("insert or ignore into domaintable (domain) values ('" + domain + "')")
         cursor.close()
         conn.commit()
-        R.release()
+        #R.release()
         conn.close()
         return True
     except:
@@ -74,7 +73,23 @@ def data_getlist(where):
         R.release()
         return False
 
+def start_getlist(where):
+    R.acquire()
+    try:
+        conn = sqlite3.connect("logs.db")
+        cursor = conn.cursor()
+        configsql = "select * from domaintable where %s" % where
+        cursor.execute(configsql)
+        list = cursor.fetchone()
+        R.release()
+        return list
+    except Exception as e:
+        print(e)
+        R.release()
+        return False
+
 def data_update(doamin, sqlstr):
+    R.acquire()
     try:
         conn = sqlite3.connect("logs.db")
         cursor = conn.cursor()
@@ -82,9 +97,11 @@ def data_update(doamin, sqlstr):
         conn.commit()
         cursor.close()
         conn.close()
+        R.release()
         return False
     except Exception as e:
         print(e)
+        R.release()
         return False
 
 

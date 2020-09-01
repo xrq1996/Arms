@@ -21,7 +21,7 @@ def post_data(session, domain, vcode, uname="0000001"):
         return False
 
 
-def 注册(domain, num=5):
+def 注册(domain, num=3):
     try:
         session = requests.session()
         res = session.get(domain + variable_storage.dede_vc_url,timeout=10)
@@ -29,18 +29,23 @@ def 注册(domain, num=5):
             res = session.get(domain + "/library/vdimgck.php", timeout=10)
         with open(file="./tp.jpg", mode="wb") as fp:
             fp.write(res.content)
+        if res.status_code != 200:
+            return {"domain":domain,"res":False,"info":"非织梦，状态码：%d" % res.status_code}
         img_path = "./tp.jpg"
-        img = Image.open(img_path)
+        try:
+            img = Image.open(img_path)
+        except:
+            return {"domain": domain, "res": False, "info": "非织梦，状态码：%d" % res.status_code}
         result = utils.base64_api(uname=variable_storage.vcode_pm_uname, pwd=variable_storage.vcode_pm_pwd, img=img)
         res = post_data(session, domain, result)
         if not res:
             raise Exception
         if "成功" in res.text or "模型不存在" in res.text or "完成基本信息的注册" in res.text:
-            return {"domain":domain,"res":True,"info":"注册成功"}
+            return {"domain":domain,"res":True,"info":"0000001"}
         elif "已存在" in res.text or "重复" in res.text or "用户名" in res.text:
             res = post_data(session, domain, result, uname=variable_storage.mail)
             if "成功" in res.text or "模型不存在" in res.text or "完成基本信息的注册" in res.text:
-                return {"domain":domain,"res":True,"info":"注册成功"}
+                return {"domain":domain,"res":True,"info":variable_storage.mail}
             else:
                 message = re.findall('(?<=document.write\()\S+(?="\);)',res.text)[0]
                 return {"domain":domain,"res":False,"info":message}
