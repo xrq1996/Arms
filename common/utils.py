@@ -8,6 +8,7 @@ from io import BytesIO
 from sys import version_info
 import random
 
+
 def get_lines(file_name="target_url", ):
     try:
         with open(file=file_name, encoding="utf-8") as fp:
@@ -32,10 +33,10 @@ def my_requests(url, method='get', timeout=15, try_count=3, show_log=False, requ
                                              proxies=variable_storage.proxy, timeout=timeout, verify=False, **args)
             else:
                 response = requester.request(method=method, url=url, headers=my_headers, timeout=timeout,
-                                            verify=False, **args)
+                                             verify=False, **args)
             response.encoding = response.apparent_encoding
-            if response.status_code == 200:
-                return response
+            # if response.status_code == 200:
+            return response
         except Exception as e:
             if show_log:
                 print(traceback.format_exc())
@@ -71,15 +72,18 @@ def find_substring(string, substring, times):
     for i in range(1, times + 1):
         current = string.find(substring, current) + 1
         if current == 0: return -1
-    print(current-1)
     return current - 1
 
 
-def group_by_list(data,num):
+def group_by_list(data, num):
     data = [data[i:i + num] for i in range(0, len(data), num)]
     return data
 
+
 def format_domain(url, protocol=False):
+    """
+    :type protocol:
+    """
     if protocol:
         if "http" not in url:
             url = "http://" + url
@@ -88,7 +92,9 @@ def format_domain(url, protocol=False):
         domain = url[:last]
     else:
         domain = url[:find_substring(url, "/", 1)]
+    # print("fmt:%s----%s"%(url,domain))
     return domain
+
 
 # 验证码识别
 def base64_api(uname, pwd, img):
@@ -100,7 +106,7 @@ def base64_api(uname, pwd, img):
     else:
         b64 = str(base64.b64encode(buffered.getvalue()))
     data = {"username": uname, "password": pwd, "image": b64}
-    result = json.loads(my_requests(method="post",url="http://api.ttshitu.com/base64", json=data).text)
+    result = json.loads(my_requests(method="post", url="http://api.ttshitu.com/base64", json=data).text)
     if result['success']:
         return result["data"]["result"]
     else:
@@ -108,29 +114,28 @@ def base64_api(uname, pwd, img):
     return ""
 
 
-
-
 UA = [
-'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/2.0 Safari/536.11',
-'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER',
-'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; LBBROWSER)',
-'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; QQBrowser/7.0.3698.400)',
-'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.84 Safari/535.11 SE 2.X MetaSr 1.0',
-'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.4.3.4000 Chrome/30.0.1599.101 Safari/537.36',
-'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 UBrowser/4.0.3214.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/2.0 Safari/536.11',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER',
+    'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; LBBROWSER)',
+    'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; QQBrowser/7.0.3698.400)',
+    'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.84 Safari/535.11 SE 2.X MetaSr 1.0',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.4.3.4000 Chrome/30.0.1599.101 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 UBrowser/4.0.3214.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101',
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122',
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71',
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95',
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-'Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)'
-'Mozilla/5.0+(compatible;+Googlebot/2.1;++http://www.google.com/bot.html)',
+    'Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)'
+    'Mozilla/5.0+(compatible;+Googlebot/2.1;++http://www.google.com/bot.html)',
 ]
 UA2 = [
-'Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)',
-'Mozilla/5.0+(compatible;+Googlebot/2.1;++http://www.google.com/bot.html)'
+    'Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)',
+    'Mozilla/5.0+(compatible;+Googlebot/2.1;++http://www.google.com/bot.html)'
 ]
+
 
 def get_headers():
     return {"User-Agent": random.choice(UA2)}

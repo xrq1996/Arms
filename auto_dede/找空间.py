@@ -32,9 +32,7 @@ class Attack:
                           "keeptime": "604800"}
             res = utils.my_requests(login_url, timeout=60, requester=self.session)
             try:
-                self.charset = re.findall('(?<=charset\=).*(?=")', res.text)[0]
-                if self.charset != "utf-8":
-                    self.charset = "gbk"
+                self.charset = res.apparent_encoding
             except Exception as e:
                 print("%s:编码识别错误" % self.domain)
             # if "vdimgck" in re.sub("(?=<!--)[\s\S]+(?<=-->)","",res.text):
