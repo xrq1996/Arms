@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ### 一条龙服务，经筛选、有后台地址、前台注册了001账号、完成登录001拿admin的cookies最后修改admin密码。
 
-from 织梦 import utils
+from common import utils
 import requests
 import traceback
 import re
