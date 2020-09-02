@@ -1,13 +1,30 @@
 # coding:utf-8
 
 from unit import dbsqlite
-import time
 import requests
 from common import utils
-from threading import Thread
 from auto_dede import 批量注册
 from auto_dede import 找空间
 from auto_dede import 找后台
+import threading
+from threading import Thread
+
+
+R = threading.Lock()
+target_domains = []
+
+
+def get_domains():
+    try:
+        R.acquire()
+        if len(target_domains) < 20 :
+            print("取数据")
+            domains = dbsqlite.data_getlist(' status = 0 limit 100')
+            target_domains.extend(domains)
+        R.release()
+    except Exception as e:
+        R.release()
+        R.release()
 
 
 # 二、注册  status： 2：成功 3：失败
@@ -17,10 +34,11 @@ def start(i):
     while True:
         status = 0
         des = ''
-        domain_model = dbsqlite.start_getlist(' status = 0 ')
-        if not domain_model:
-            print('线程：%d,未查到符合条件数据,等待3s' % i)
-            time.sleep(3)
+        try:
+            domain_model = target_domains.pop(0)
+        except Exception as e:
+            print('线程：%d,未查到符合条件数据,等待...' % i)
+            get_domains()
             continue
         url = domain_model[1]
         reg_result = 批量注册.注册(url,num=0)
@@ -40,6 +58,7 @@ def start(i):
                     des = mange_result['info']
                 else:
                     status = 7
+                    print("模式1未找到后台地址：%s" % url)
                     des = mange_result['info']
             else:
                 status = 5
@@ -48,12 +67,13 @@ def start(i):
             status = 3
             des = reg_result['info']
         # insert db
+        print("%s----%s" % (des, domain_model[1]))
         dbsqlite.data_update(domain_model[1], "status = %d,des = '%s'" % (status, des))
-        print(url+des)
 
 
 if __name__ == '__main__':
-    start(1)
+    # target_domains.append([1,"http://www.heb315.com","1"])
+    # start(1)
     try:
         Threads = []
         for i in range(10):

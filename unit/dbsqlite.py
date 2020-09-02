@@ -57,18 +57,23 @@ def data_getlist(where):
         cursor = conn.cursor()
         configsql = "select * from domaintable where %s" % where
         cursor.execute(configsql)
-        list = cursor.fetchone()
-        if list:
-            cursor.execute("update domaintable set is_crawl = 1 where id ="+ str(list[0]))
+        list = cursor.fetchall()
+        for data in list:
+            cursor.execute("update domaintable set is_crawl = 1 where id ="+ str(data[0]))
             conn.commit()
-            cursor.close()
-            conn.close()
-            R.release()
-            return list
-        else:
-            R.release()
-            return False
+        cursor.close()
+        conn.close()
+        R.release()
+        return list
     except Exception as e:
+        try:
+            conn.close()
+        except Exception as e:
+            pass
+        try:
+            cursor.close()
+        except Exception as e:
+            pass
         print(e)
         R.release()
         return False

@@ -13,7 +13,7 @@ def my_requests(url, method='get', timeout=15, try_count=3, **args):
             if response.status_code == 200:
                 return response
             else:
-                print(url+'---request err:'+ str(response.status_code))
+                # print(url+'---request err:'+ str(response.status_code))
                 return None
         except Exception as e:
             continue

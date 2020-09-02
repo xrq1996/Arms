@@ -8,9 +8,9 @@ import re
 from common import utils
 # re.findall('(?<=document.write\()\S+(?="\);)',res.text)
 
-def post_data(session, domain, vcode, uname="0000001"):
+def post_data(session, domain, vcode, uname="0000001",dopost="regbase"):
     try:
-        params = {"dopost": "regbase", "step": 1, "mtype": "个人", "mtype": "个人", "userid": uname, "uname": "0000001",
+        params = {"dopost": dopost, "step": 1, "mtype": "个人", "mtype": "个人", "userid": uname, "uname": "0000001c",
                   "userpwd": "qwe123", "userpwdok": "qwe123", "email": "ldanche@protonmail.com", "safequestion": 0,
                   "safeanswer": "", "sex": "", "agree": ""}
         params.update({"vdcode": vcode})
@@ -48,6 +48,12 @@ def 注册(domain, num=3):
             res = post_data(session, domain, result, uname=variable_storage.mail)
             if "成功" in res.text or "模型不存在" in res.text or "完成基本信息的注册" in res.text or "存在" in res.text or "重复" in res.text:
                 return {"domain":domain,"res":True,"info":variable_storage.mail}
+            if  "Email已经被" in res.text:
+                return {"domain": domain, "res": True, "info": "0000001"}
+        else:
+            res = post_data(session, domain, result, dopost="regok")
+            if "成功" in res.text or "模型不存在" in res.text or "完成基本信息的注册" in res.text or "存在" in res.text or "重复" in res.text:
+                return {"domain": domain, "res": True, "info": "0000001"}
         message = re.findall('(?<=document.write\()\S+(?="\);)', res.text)[0]
         return {"domain":domain,"res":False,"info":"注册失败：%d--%s"%(res.status_code,message)}
     except ConnectionError as e:
@@ -59,7 +65,6 @@ def 注册(domain, num=3):
             print("尝试重新注册：" + domain)
             return 注册(domain, num - 1)
         else:
-            traceback.print_exc()
             return {"domain":domain,"res":False,"info":"未知异常"}
 
 def main():
