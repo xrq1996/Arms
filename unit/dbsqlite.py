@@ -78,6 +78,7 @@ def data_getlist(where):
         R.release()
         return False
 
+
 def start_getlist(where):
     R.acquire()
     try:
@@ -85,20 +86,48 @@ def start_getlist(where):
         cursor = conn.cursor()
         configsql = "select * from domaintable where %s" % where
         cursor.execute(configsql)
-        list = cursor.fetchone()
+        list = cursor.fetchall()
+        cursor.close()
+        conn.close()
         R.release()
         return list
+    except Exception as e:
+        try:
+            conn.close()
+        except Exception as e:
+            pass
+        try:
+            cursor.close()
+        except Exception as e:
+            pass
+        print(e)
+        R.release()
+        return False
+
+def data_update(domain, sqlstr):
+    R.acquire()
+    try:
+        conn = sqlite3.connect("logs.db")
+        cursor = conn.cursor()
+        cursor.execute("update domaintable set %s where domain ='%s' "% (sqlstr,domain))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        R.release()
+        return False
     except Exception as e:
         print(e)
         R.release()
         return False
 
-def data_update(doamin, sqlstr):
+
+def batch_data_update(domains, sqlstr):
     R.acquire()
     try:
         conn = sqlite3.connect("logs.db")
         cursor = conn.cursor()
-        cursor.execute("update domaintable set %s where domain ='%s' "% (sqlstr,doamin))
+        for domain in domains:
+            cursor.execute("update domaintable set %s where domain ='%s' "% (sqlstr,domain))
         conn.commit()
         cursor.close()
         conn.close()

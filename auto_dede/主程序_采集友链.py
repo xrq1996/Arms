@@ -14,6 +14,9 @@ from common import utils
 import tldextract
 
 
+# from requests import InsecureRequestWarning
+# requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 def my_requests(url, method='get', timeout=15, try_count=3, **args):
     for n in range(try_count):
         try:
@@ -65,7 +68,7 @@ def crawling(i):
             #title_words = ['银行', '政府', '管理', '内容', '系统']
             path = './dict/采集标题过滤字典.txt'
             title_words = utils.get_lines(path)
-            domain_model = dbsqlite.data_getlist(' is_crawl = 0 ')
+            domain_model = dbsqlite.data_getlist(' is_crawl = 0 limit 1')[0]
             if not domain_model:
                 print('线程：%d未查到采集源,等待3s' % i)
                 time.sleep(3)

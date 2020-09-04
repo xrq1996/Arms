@@ -9,6 +9,7 @@ from sys import version_info
 import random
 
 
+
 def get_lines(file_name="target_url", ):
     try:
         with open(file=file_name, encoding="utf-8") as fp:

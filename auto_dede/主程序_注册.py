@@ -19,7 +19,7 @@ def get_domains():
         R.acquire()
         if len(target_domains) < 20 :
             print("取数据")
-            domains = dbsqlite.data_getlist(' status = 0 limit 100')
+            domains = dbsqlite.start_getlist(' status = 0 limit 100')
             target_domains.extend(domains)
         R.release()
     except Exception as e:
