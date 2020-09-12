@@ -22,6 +22,18 @@ def bash_select_weight():
         for res in ress:
             fp.write("\nd%s|%s"%(res[0], res[1]))
 
+def select_weight(domain):
+    weight = 0
+    try:
+        aizhan_api = "https://apistore.aizhan.com/baidurank/siteinfos/%s?domains=%s" % (my_key, domain.replace("https://", "").replace("http://", ""))
+        res = utils.my_requests(aizhan_api)
+        data = json.loads(res.text)["data"]["success"]
+        weight = data[0]["pc_br"]
+    except Exception as e:
+        traceback.print_exc()
+    return weight
+
+
 
 if __name__ == '__main__':
-    bash_select_weight()git config core. excludesfile .gitignore
+    select_weight('http://www.baidu.com')
